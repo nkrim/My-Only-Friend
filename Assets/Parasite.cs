@@ -18,6 +18,8 @@ public class Parasite : MonoBehaviour
     private Transform offset;
     private List<Rigidbody2D> tail_links;
     private ParasiteHead head;
+    private Character chr;
+
 
 
     // Lifecycle
@@ -25,10 +27,11 @@ public class Parasite : MonoBehaviour
         // Linking
         if(!(offset = transform.Find("Parasite Tail Offset"))) Debug.LogWarning("PARASITE COULD NOT FIND OFFSET");
         tail_links = new List<Rigidbody2D>();
-        for(int i=1; i<offset.childCount; i++) {
+        for(int i=0; i<offset.childCount; i++) {
             tail_links.Add(offset.GetChild(i).GetComponent<Rigidbody2D>());
         }
         head = GetComponentInChildren<ParasiteHead>();
+        chr = GetComponentInParent<Character>();
     }
 
     private void Start () {
@@ -36,11 +39,15 @@ public class Parasite : MonoBehaviour
     }
 
     private void Update () {
+        if (chr.removeControl)
+            return;
         // Grab and ungrab
 
     }
 
     private void FixedUpdate () {
+        if (chr.removeControl)
+            return;
         //if(injecting) {
         //    Rigidbody2D base_link = tail_links[0];
         //    base_link.velocity = transform.right * injectionSpeed * (flippedX ? -1 : 1);
@@ -83,6 +90,25 @@ public class Parasite : MonoBehaviour
                 t.position = prev_transform.position + pos_adjust;
                 t.localScale = new Vector3(-t.localScale.x, t.localScale.y, t.localScale.z);
                 t.localEulerAngles = new Vector3(0, 0, -prev_transform.localEulerAngles.z); // Divide by 2 to counteract springing of joint;
+            prev_transform = t;
+        }
+    }
+
+    public void ResetTail() {
+        Rigidbody2D base_link = tail_links[0];
+        Transform t = base_link.transform;
+        t.localPosition = new Vector3(t.localPosition.x, 0, 0);
+        t.localScale = new Vector3(t.localScale.x, 1, 1);
+        t.localEulerAngles = new Vector3(0, 0, t.localEulerAngles.z);
+        Transform prev_transform = t;
+        for (int i = 1; i < tail_links.Count; i++) {
+            Rigidbody2D rb = tail_links[i];
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = 0;
+            t = rb.transform;
+            Vector3 pos_adjust = injectionIncrement * prev_transform.right * (flippedX ? 1 : -1);
+            t.position = prev_transform.position + pos_adjust;
+            t.localEulerAngles = new Vector3(0, 0, prev_transform.localEulerAngles.z); // Divide by 2 to counteract springing of joint;
             prev_transform = t;
         }
     }

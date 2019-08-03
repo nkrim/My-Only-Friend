@@ -34,7 +34,9 @@ public class ParasiteHead : MonoBehaviour
 
 
     private void Update () {
-        if(is_grabbed & Input.GetMouseButtonUp(0))
+        if (chr.removeControl)
+            return;
+        if (is_grabbed & Input.GetMouseButtonUp(0))
             Ungrab();
         else if(!is_grabbed & Input.GetMouseButtonDown(0))
             Grab();
@@ -43,26 +45,24 @@ public class ParasiteHead : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        if(chr.removeControl)
+            return;
         // Get mouse position
         Vector3 m_pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        m_pos.z = 0;
         // Push rigidbody towards m_pos
         Vector3 force = m_pos - transform.position;
         Vector3 forceDir = force.normalized;
         //rb.AddForce(moveForce*forceDir);
         if(!is_grabbed) {
-            //rb.AddForce(moveForce * forceDir);
-            //rb.velocity = Vector2.ClampMagnitude(rb.velocity, maxSpeed);
+            rb.AddForce(moveForce * forceDir);
+            rb.velocity = Vector2.ClampMagnitude(rb.velocity, maxSpeed);
         }
         else {
             chr_rb.AddForce(grabbedForce * -forceDir, ForceMode2D.Impulse);
             chr_rb.velocity = Vector2.ClampMagnitude(chr_rb.velocity, maxSpeed);
         }
 
-    }
-
-    private void OnDrawGizmos () {
-        Vector3 m_pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Gizmos.DrawSphere(m_pos, 0.5f);
     }
 
 
@@ -78,8 +78,8 @@ public class ParasiteHead : MonoBehaviour
     void Ungrab () {
         rb.constraints = RigidbodyConstraints2D.None;
         chr_rb.mass = original_dog_mass;
-        chr_rb.transform.rotation = Quaternion.identity;
-        chr_rb.freezeRotation = true;
+        //chr_rb.transform.rotation = Quaternion.identity;
+        //chr_rb.freezeRotation = true;
         is_grabbed = false;
 
         // Propel chr_rb
