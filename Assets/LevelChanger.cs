@@ -31,6 +31,7 @@ public class LevelChanger : MonoBehaviour
             }
         }
         cur_level.ActivateLevel();
+        cur_level.Restart();
     }
 
     public void Update () {

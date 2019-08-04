@@ -11,19 +11,33 @@ public class LevelMarker : MonoBehaviour
 
     private GameObject light_list = null;
     private CinemachineVirtualCamera vc = null;
+    private LevelChanger lc = null;
+    private Character player = null;
 
     private void Awake () {
         light_list = transform.Find("Lights").gameObject;
         light_list.SetActive(false);
         vc = GetComponent<CinemachineVirtualCamera>();
+        lc = Camera.main.GetComponent<LevelChanger>();
+        player = GameObject.FindWithTag("Player").GetComponent<Character>();
     }
 
     private void Start () {
 
     }
 
+    private void Update () {
+        // Check if character has gotten too far away (by slipping through)
+        if(lc.cur_level == this) {
+            Vector3 chr_pos = player.transform.position;
+            if (Vector2.Distance(chr_pos, transform.position) > 20) {
+                Restart();
+            }
+        }
+
+    }
+
     private void OnTriggerEnter2D (Collider2D collision) {
-        LevelChanger lc = Camera.main.GetComponent<LevelChanger>();
         if(lc.cur_level == this)
             return;
         this.ActivateLevel();
@@ -32,13 +46,14 @@ public class LevelMarker : MonoBehaviour
         lc.cur_level = this;
     }
     private void OnTriggerExit2D (Collider2D collision) {
-        LevelChanger lc = Camera.main.GetComponent<LevelChanger>();
         if(lc.cur_level == this) {
             Collider2D dog_cldr = GameObject.FindWithTag("Player").GetComponent<Character>().GetDog().GetComponent<Collider2D>();
-            lc.prev_level.ActivateLevel();
-            lc.cur_level.DeactivateLevel();
-            lc.cur_level = lc.prev_level;
-            lc.prev_level = this;
+            if(dog_cldr.IsTouching(lc.prev_level.GetComponent<Collider2D>())) {
+                lc.prev_level.ActivateLevel();
+                lc.cur_level.DeactivateLevel();
+                lc.cur_level = lc.prev_level;
+                lc.prev_level = this;
+            }
         }
     }
 
@@ -57,7 +72,7 @@ public class LevelMarker : MonoBehaviour
     }
 
     public void Restart() {
-        Character player = GameObject.FindWithTag("Player").GetComponent<Character>();
+        //Character player = GameObject.FindWithTag("Player").GetComponent<Character>();
 
         Vector3 new_pos = transform.TransformPoint(respawnPoint);
         new_pos.z = 0;

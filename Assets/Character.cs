@@ -13,6 +13,8 @@ public class Character : MonoBehaviour {
     [Range(0f, 1f)]
     public float walkRampAir = 0.3f;
 
+    public float refreezeAngle = 5f;
+
     public bool removeControl = true;
     public bool removeControlOnInit = true;
 
@@ -34,6 +36,7 @@ public class Character : MonoBehaviour {
     private Collider2D back_cldr;
     private SpriteRenderer dog_sprite;
     private ParasiteHead p_head;
+    private Animator anim;
 
     // Layer masks
     private LayerMask foreground_mask;
@@ -50,6 +53,7 @@ public class Character : MonoBehaviour {
         if (!(back_cldr = transform.Find("BackCollider").GetComponent<Collider2D>())) Debug.LogWarning("CHARACTER CAN'T FIND BACK COLLIDER");
         if (!(dog_sprite = transform.Find("Dog").GetComponent<SpriteRenderer>())) Debug.LogWarning("CHARACTER CAN'T FIND DOG SPRITE");
         p_head = GetComponentInChildren<ParasiteHead>();
+        anim = GetComponentInChildren<Animator>();
         // Init layer masks
         foreground_mask = LayerMask.GetMask(new string[] { "Foreground" });
         // other
@@ -59,9 +63,13 @@ public class Character : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
+        // Can set up curves from here
+        input_x = Input.GetAxis("Horizontal");
+
         if (removeControl) {
             // FLip jumping
             if (flip_jumping > 0) {
+                print(flip_jumping);
                 if (flip_jumping > 0.5) {
                     transform.position += (flip_jumping - 0.5f) * Vector3.up;
                 }
@@ -70,7 +78,7 @@ public class Character : MonoBehaviour {
                 float goal_angle = Mathf.Lerp(cur_angle, 0, 0.25f);
                 transform.localEulerAngles = new Vector3(0, 0, goal_angle);
                 flip_jumping = Mathf.Abs(goal_angle / 180);
-                if (flip_jumping < 0.01) {
+                if (flip_jumping < 0.1) {
                     flip_jumping = -1;
                     removeControl = false;
                     rb.bodyType = RigidbodyType2D.Dynamic;
@@ -78,9 +86,9 @@ public class Character : MonoBehaviour {
                     rb.freezeRotation = true;
                     // Reset dog
                     dog.gameObject.layer = LayerMask.NameToLayer("Dog");
-                    // Reset tail
-                    parasite.ResetTail();
                 }
+                // Reset tail
+                parasite.ResetTail();
             }
             else if (removeControlOnInit) {
                 if (jump_cldr.IsTouchingLayers(foreground_mask) || top_cldr.IsTouchingLayers(foreground_mask) || front_cldr.IsTouchingLayers(foreground_mask) || back_cldr.IsTouchingLayers(foreground_mask)) {
@@ -88,27 +96,30 @@ public class Character : MonoBehaviour {
                     //removeControlOnInit = false;
                 }
             }
-            return;
         }
-        if (p_head.IsGrabbed())
-            return;
-        if (Input.GetButtonDown("Jump")) {
-            jump_pressed = true;
-        }
-        // Can set up curves from here
-        input_x = Input.GetAxis("Horizontal");
+        // !removeControl stuff
+        else if (!p_head.IsGrabbed()) { 
+            if (Input.GetButtonDown("Jump")) {
+                jump_pressed = true;
+            }
 
-        // Count for flip_jumping
-        if(IsGroundedForFlip())
-            time_falesly_grounded += Time.deltaTime;
-        else
-            time_falesly_grounded = 0;
+            // Count for flip_jumping
+            if(IsGroundedForFlip())
+                time_falesly_grounded += Time.deltaTime;
+            else
+                time_falesly_grounded = 0;
 
-        // If unfrozen, grounded and near-flat, refreeze rotation
-        if(!rb.freezeRotation && IsGrounded() && Mathf.Abs(transform.localEulerAngles.z) < 0.1) {
-            transform.localEulerAngles = Vector3.zero;
-            rb.freezeRotation = true;
+            // If unfrozen, grounded and near-flat, refreeze rotation
+            if(!rb.freezeRotation && IsGrounded() && Mathf.Abs(transform.localEulerAngles.z) < refreezeAngle) {
+                transform.localEulerAngles = Vector3.zero;
+                rb.freezeRotation = true;
+            }
         }
+
+        // Animation updating
+        anim.SetBool("IsGrounded", IsGrounded());
+        anim.SetBool("IsMoving", Mathf.Abs(input_x) > 0.1f || Mathf.Abs(rb.velocity.x) > 1f);
+        //print(anim.GetBool("IsGrounded"));
     }
 
     private void FixedUpdate () {

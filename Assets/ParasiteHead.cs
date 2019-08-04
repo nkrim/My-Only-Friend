@@ -4,16 +4,19 @@ using UnityEngine;
 
 public class ParasiteHead : MonoBehaviour
 {
+    public Sprite closedMouth = null;
     public float moveForce = 0.5f;
     public float grabbedForce = 10f;
     public float maxSpeed = 10f;
     public float carryOverVelocityCoeff = 5f;
     public float grabbedDogMass = 1f;
 
+    Sprite openMouth = null;
     bool is_grabbed = false;
     float original_dog_mass;
 
     // Linking vars
+    private SpriteRenderer sr = null;
     private Collider2D cldr;
     private Rigidbody2D rb;
     private Character chr;
@@ -23,6 +26,8 @@ public class ParasiteHead : MonoBehaviour
     private LayerMask foreground_mask;
 
     private void Awake () {
+        sr = GetComponent<SpriteRenderer>();
+        openMouth = sr.sprite;
         cldr = GetComponent<Collider2D>();
         rb = GetComponent<Rigidbody2D>();
         chr = GetComponentInParent<Character>();
@@ -40,6 +45,8 @@ public class ParasiteHead : MonoBehaviour
             Ungrab();
         else if(!is_grabbed & Input.GetMouseButtonDown(0))
             Grab();
+        sr.sprite = Input.GetMouseButton(0) ? closedMouth : openMouth;
+
     }
 
     // Update is called once per frame
@@ -50,15 +57,18 @@ public class ParasiteHead : MonoBehaviour
         // Get mouse position
         Vector3 m_pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         m_pos.z = 0;
-        // Push rigidbody towards m_pos
-        Vector3 force = m_pos - transform.position;
-        Vector3 forceDir = force.normalized;
         //rb.AddForce(moveForce*forceDir);
         if(!is_grabbed) {
+            // Push rigidbody towards m_pos
+            Vector3 force = m_pos - transform.position;
+            Vector3 forceDir = force.normalized;
             rb.AddForce(moveForce * forceDir);
             rb.velocity = Vector2.ClampMagnitude(rb.velocity, maxSpeed);
         }
         else {
+            // Push rigidbody towards m_pos
+            Vector3 force = m_pos - transform.parent.GetChild(0).position; // Relative to base
+            Vector3 forceDir = force.normalized;
             chr_rb.AddForce(grabbedForce * -forceDir, ForceMode2D.Impulse);
             chr_rb.velocity = Vector2.ClampMagnitude(chr_rb.velocity, maxSpeed);
         }
@@ -81,7 +91,6 @@ public class ParasiteHead : MonoBehaviour
         //chr_rb.transform.rotation = Quaternion.identity;
         //chr_rb.freezeRotation = true;
         is_grabbed = false;
-
         // Propel chr_rb
         chr_rb.velocity *= carryOverVelocityCoeff;
     }
