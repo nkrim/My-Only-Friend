@@ -89,4 +89,16 @@ public class LevelMarker : MonoBehaviour
             player.transform.localEulerAngles = Vector3.zero;
     }
 
+    public IEnumerator _ProcessShake (float amplitude = 1f, float frequency = 5f, float shakeTiming = 0.5f) {
+        Noise(amplitude, frequency);
+        yield return new WaitForSeconds(shakeTiming);
+        Noise(0, 0);
+    }
+
+    void Noise (float amplitudeGain, float frequencyGain) {
+        CinemachineBasicMultiChannelPerlin noise = vc.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+        noise.m_AmplitudeGain = amplitudeGain;
+        noise.m_FrequencyGain = frequencyGain;
+    }
+
 }

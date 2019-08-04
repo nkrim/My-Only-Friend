@@ -48,4 +48,8 @@ public class LevelChanger : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
             cur_level.Restart();
     }
+
+    public void ScreenShake(float amplitude = 1f, float frequency = 5f, float timing = 0.5f) {
+        StartCoroutine(cur_level._ProcessShake(amplitude, frequency, timing));
+    }
 }

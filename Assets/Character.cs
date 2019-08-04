@@ -37,6 +37,7 @@ public class Character : MonoBehaviour {
     private SpriteRenderer dog_sprite;
     private ParasiteHead p_head;
     private Animator anim;
+    private LevelChanger lc;
 
     // Layer masks
     private LayerMask foreground_mask;
@@ -54,6 +55,7 @@ public class Character : MonoBehaviour {
         if (!(dog_sprite = transform.Find("Dog").GetComponent<SpriteRenderer>())) Debug.LogWarning("CHARACTER CAN'T FIND DOG SPRITE");
         p_head = GetComponentInChildren<ParasiteHead>();
         anim = GetComponentInChildren<Animator>();
+        lc = Camera.main.GetComponent<LevelChanger>();
         // Init layer masks
         foreground_mask = LayerMask.GetMask(new string[] { "Foreground" });
         // other
@@ -93,7 +95,7 @@ public class Character : MonoBehaviour {
             else if (removeControlOnInit) {
                 if (jump_cldr.IsTouchingLayers(foreground_mask) || top_cldr.IsTouchingLayers(foreground_mask) || front_cldr.IsTouchingLayers(foreground_mask) || back_cldr.IsTouchingLayers(foreground_mask)) {
                     removeControl = false;
-                    //removeControlOnInit = false;
+                    removeControlOnInit = false;
                 }
             }
         }
@@ -119,6 +121,12 @@ public class Character : MonoBehaviour {
         // Animation updating
         anim.SetBool("IsGrounded", IsGrounded());
         anim.SetBool("IsMoving", Mathf.Abs(input_x) > 0.1f || Mathf.Abs(rb.velocity.x) > 1f);
+        // THe chomp
+        if(Input.GetButtonDown("Fire1")) {
+            anim.SetTrigger("Bite");
+            float shake_timing = 0.2f; // change if something is bit
+            lc.ScreenShake(0.25f, 2f, shake_timing);
+        }
         //print(anim.GetBool("IsGrounded"));
     }
 
