@@ -17,6 +17,13 @@ public class Character : MonoBehaviour {
 
     public bool removeControl = true;
     public bool removeControlOnInit = true;
+    public bool hideParasiteOnStart = true;
+    public float parasiteStartX = 0.68f;
+
+    public GameObject setActiveAfterFlip;
+
+    [HideInInspector]
+    public Meat target_meat = null;
 
     // Input vars
     bool jump_pressed = false;
@@ -63,6 +70,13 @@ public class Character : MonoBehaviour {
             removeControl = true;
     }
 
+    private void Start () {
+        if(hideParasiteOnStart) {
+            parasite.transform.localPosition = new Vector3(parasiteStartX, 0, 0);
+            parasite.gameObject.SetActive(false);
+        }
+    }
+
     // Update is called once per frame
     void Update() {
         // Can set up curves from here
@@ -71,7 +85,6 @@ public class Character : MonoBehaviour {
         if (removeControl) {
             // FLip jumping
             if (flip_jumping > 0) {
-                print(flip_jumping);
                 if (flip_jumping > 0.5) {
                     transform.position += (flip_jumping - 0.5f) * Vector3.up;
                 }
@@ -88,6 +101,10 @@ public class Character : MonoBehaviour {
                     rb.freezeRotation = true;
                     // Reset dog
                     dog.gameObject.layer = LayerMask.NameToLayer("Dog");
+                    // Set active after flip
+                    if(setActiveAfterFlip && !setActiveAfterFlip.activeSelf) {
+                        setActiveAfterFlip.SetActive(true);
+                    }
                 }
                 // Reset tail
                 parasite.ResetTail();
@@ -116,18 +133,23 @@ public class Character : MonoBehaviour {
                 transform.localEulerAngles = Vector3.zero;
                 rb.freezeRotation = true;
             }
+
+            // THe chomp
+            if (Input.GetButtonDown("Fire1")) {
+                anim.SetTrigger("Bite");
+                if (target_meat) {
+                    lc.ScreenShake(1f, 4f, 0.2f);
+                    target_meat.Eat();
+                }
+                else {
+                    lc.ScreenShake(0.25f, 2f, 0.2f);
+                }
+            }
         }
 
         // Animation updating
         anim.SetBool("IsGrounded", IsGrounded());
         anim.SetBool("IsMoving", Mathf.Abs(input_x) > 0.1f || Mathf.Abs(rb.velocity.x) > 1f);
-        // THe chomp
-        if(Input.GetButtonDown("Fire1")) {
-            anim.SetTrigger("Bite");
-            float shake_timing = 0.2f; // change if something is bit
-            lc.ScreenShake(0.25f, 2f, shake_timing);
-        }
-        //print(anim.GetBool("IsGrounded"));
     }
 
     private void FixedUpdate () {
@@ -192,8 +214,17 @@ public class Character : MonoBehaviour {
             rb.velocity = new Vector3(final_vel_x, rb.velocity.y);
         // Flip sprite
         if (IsGrounded() && Mathf.Abs(input_x) > 0.01 && dog_sprite.flipX == final_vel_x > 0 /*&& Mathf.Abs(final_vel_x) > 0.01*/)  {
-            dog_sprite.flipX = !dog_sprite.flipX;
-            parasite.FlipX(dog_sprite.flipX);
+            FlipX();
         }
+    }
+
+    public void FlipX() {
+        if(!dog_sprite)
+            return;
+        dog_sprite.flipX = !dog_sprite.flipX;
+        parasite.FlipX(dog_sprite.flipX);
+    }
+    public bool IsFlippedX() {
+        return dog_sprite && dog_sprite.flipX;
     }
 }

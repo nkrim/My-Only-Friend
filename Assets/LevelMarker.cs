@@ -8,6 +8,7 @@ public class LevelMarker : MonoBehaviour
 {
     public Vector3 respawnPoint = Vector3.zero;
     public bool initUpsideDown = false;
+    public bool initFlipped = false;
 
     private GameObject light_list = null;
     private CinemachineVirtualCamera vc = null;
@@ -83,10 +84,15 @@ public class LevelMarker : MonoBehaviour
                 par.ResetTail();
         } 
 
-        if (initUpsideDown)
+        if (initUpsideDown) { 
             player.transform.localEulerAngles = new Vector3(0,0,180);
+            player.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.None;
+        }
         else
             player.transform.localEulerAngles = Vector3.zero;
+
+        if(initFlipped != player.IsFlippedX())
+            player.FlipX();
     }
 
     public IEnumerator _ProcessShake (float amplitude = 1f, float frequency = 5f, float shakeTiming = 0.5f) {

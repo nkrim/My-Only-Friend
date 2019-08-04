@@ -15,6 +15,7 @@ public struct Dialogue {
 public class DialogueSystem : MonoBehaviour { 
 
     public List<Sprite> characters;
+    public float scrollSpeed = 0.1f;
 
     List<Dialogue> dialogueScenes = new List<Dialogue>();
     Dialogue cur_scene;
@@ -26,6 +27,7 @@ public class DialogueSystem : MonoBehaviour {
     private Transform dialogue_box_face_right = null;
 
     private Character chr;
+    private ParasiteHead p_head;
 
 
 
@@ -35,13 +37,14 @@ public class DialogueSystem : MonoBehaviour {
         dialogue_box_face_right = transform.Find("Canvas/DialogueFaceRight");
 
         chr = GameObject.FindWithTag("Player").GetComponent<Character>();
+        p_head = GameObject.FindWithTag("ParasiteHead").GetComponent<ParasiteHead>();
     }
 
     // Start is called before the first frame update
     void Start()
     {
         InstantiateDialogueScenes();
-        StartScene(0);
+        //StartScene(0);
     }
 
     // Update is called once per frame
@@ -66,17 +69,28 @@ public class DialogueSystem : MonoBehaviour {
         }
     }
 
-    public void StartScene(int index) {
+    private void FixedUpdate () {
+        if (sentence_index >= 0 && cur_scene.dialogue[sentence_index].spriteIndex > 0) {
+            p_head.ForceMoveHead(chr.transform.position + 0.75f*new Vector3(chr.IsFlippedX() ? 1 : -1,1));
+        }
+    }
+
+    public bool StartScene(int index) {
+        if(index >= dialogueScenes.Count)
+            return false;
+        chr.removeControl = true;
         Dialogue d = dialogueScenes[index];
         cur_scene = d;
         sentence_index = 0;
         StartSentence(cur_scene.dialogue[0]);
+        return true;
     }
-    public void StartScene(string name) {
+    public bool StartScene(string name) {
         for(int i=0; i<dialogueScenes.Count; i++) {
             if(dialogueScenes[i].name.Equals(name))
-                StartScene(i);
+                return StartScene(i);
         }
+        return false;
     }
     void EndScene() {
         sentence_index = -1;
@@ -111,7 +125,7 @@ public class DialogueSystem : MonoBehaviour {
     }
     IEnumerator _ProcessText(TextMeshProUGUI tmp, string text) {
         for(int i=0; i<text.Length; i++) {
-            yield return new WaitForSeconds(0.15f);
+            yield return new WaitForSeconds(scrollSpeed);
             tmp.text += text[i];
         }
         text_scroll = null;
@@ -120,7 +134,7 @@ public class DialogueSystem : MonoBehaviour {
 
 
     void InstantiateDialogueScenes() {
-        // SCENE 1 - Intro
+        // SCENE - Intro
         Dialogue d = new Dialogue {
             name = "Intro",
             dialogue = new List<Sentence>()
@@ -163,7 +177,254 @@ public class DialogueSystem : MonoBehaviour {
         });
         dialogueScenes.Add(d);
 
+        // Scene - HowToParasite
+        d = new Dialogue {
+            name = "HowToParasite",
+            dialogue = new List<Sentence>()
+        };
+        d.dialogue.Add(new Sentence {
+            spriteIndex = -1,
+            text = "YOUR PARASITE CAN\nCLING TO SURFACES"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = -1,
+            text = "USE IT TO FLING\nONTO THAT CLIFF"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "YEAH COME ON FRIEND"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "I'M JUST HERE TO HELP"
+        });
+        dialogueScenes.Add(d);
 
-        // Scene 2
+
+        // Scene - SeeFirstRabbit
+        d = new Dialogue {
+            name = "SeeFirstRabbit",
+            dialogue = new List<Sentence>()
+        };
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "HEY, SEE THAT IDIOT"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "WHAT'RE THEY DOING THERE"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "YOU DON’T NEED THEM"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "I'M YOUR ONLY FRIEND"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "KILL IT! KILL IT FOR ME!"
+        });
+        dialogueScenes.Add(d);
+
+        // Scene - KillFirstRabbit
+        d = new Dialogue {
+            name = "KillFirstRabbit",
+            dialogue = new List<Sentence>()
+        };
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 0,
+            text = "*CHOMP*!!!"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "YES VERY GOOD\nVERY GOOD KILL YES"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "YES YES\nI LIKE THE WAY YOU KILL"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "NOW LET ME FEED!"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "I'VE BEEN SUCH A\nGOOD FRIEND"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "SO I THINK I DESERVE\nTHE FIRST BITE!"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 0,
+            text = "..."
+        });
+        dialogueScenes.Add(d);
+
+        // Scene - CantEat
+        d = new Dialogue {
+            name = "CantEat",
+            dialogue = new List<Sentence>()
+        };
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 0,
+            text = "*CHOMP CHO-*"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "HEY!"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "GET YOUR DIRTY MOUTH\nOFF THAT!"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "I'M THE ONE DOING\nALL THE WORK HERE"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "THAT FOOD IS FOR ME!"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 0,
+            text = "..."
+        });
+        dialogueScenes.Add(d);
+
+        // Scene - EatFirstRabbit
+        d = new Dialogue {
+            name = "EatFirstRabbit",
+            dialogue = new List<Sentence>()
+        };
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "*SLLLLLLURRRRRPP*"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "SO DELICIOUS\nSO SCRUMPTIOUS MMM"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "I LOVE IT\nI LOVE IT I LOVE IT!"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "SUSTENANCE I NEED\nMORE!!!"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "I'M YOUR ONE\nAND ONLY FRIEND"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "SO YOU BETTER\nGET MORE FOR ME!!!"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 0,
+            text = "....."
+        });
+        dialogueScenes.Add(d);
+
+        // Scene - EatLastRabbit
+        d = new Dialogue {
+            name = "EatLastRabbit",
+            dialogue = new List<Sentence>()
+        };
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "MMM SO DELICIOUS MMM"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "I’M SO FULL!"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "TUMMY WUMMY\nFULL OF DEAD FRIENDS"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "NOT FRIENDS!"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "I’M THE ONLY FRIEND\nYOU NEED"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "..."
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "BEING FULL\nMAKES ME SLEEPY..."
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "VERY TIRED..."
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "ZZZZZZZZZZZZ"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 0,
+            text = ".........."
+        });
+        dialogueScenes.Add(d);
+
+        // Scene - Finale
+        d = new Dialogue {
+            name = "Finale",
+            dialogue = new List<Sentence>()
+        };
+        d.dialogue.Add(new Sentence {
+            spriteIndex = -1,
+            text = "*PLOP*"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = -1,
+            text = "HEY!"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = -1,
+            text = "HEY FRIEND!"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 0,
+            text = "..."
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "ZZZ..."
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = -1,
+            text = "WHAT'S THIS?\nANOTHER FRIEND?"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = -1,
+            text = "NO!"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = -1,
+            text = "ONLY ONE FRIEND!"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 0,
+            text = "..."
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = 1,
+            text = "AGHHHHHHHHHHH!!!!!"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = -1,
+            text = "I’M YOU’RE\nONLY FRIEND NOW..."
+        });
+        dialogueScenes.Add(d);
     }
 }

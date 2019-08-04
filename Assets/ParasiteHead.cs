@@ -11,6 +11,9 @@ public class ParasiteHead : MonoBehaviour
     public float carryOverVelocityCoeff = 5f;
     public float grabbedDogMass = 1f;
 
+    [HideInInspector]
+    public Meat target_meat = null;
+
     Sprite openMouth = null;
     bool is_grabbed = false;
     float original_dog_mass;
@@ -43,8 +46,13 @@ public class ParasiteHead : MonoBehaviour
             return;
         if (is_grabbed & Input.GetMouseButtonUp(0))
             Ungrab();
-        else if(!is_grabbed & Input.GetMouseButtonDown(0))
-            Grab();
+        else if(!is_grabbed & Input.GetMouseButtonDown(0)) {
+            if(target_meat != null) {
+                target_meat.Eat();
+            }
+            else
+                Grab();
+        }
         sr.sprite = Input.GetMouseButton(0) ? closedMouth : openMouth;
 
     }
@@ -73,6 +81,13 @@ public class ParasiteHead : MonoBehaviour
             chr_rb.velocity = Vector2.ClampMagnitude(chr_rb.velocity, maxSpeed);
         }
 
+    }
+
+    public void ForceMoveHead(Vector3 target) {
+        Vector3 force = target - transform.position;
+        Vector3 forceDir = force.normalized;
+        rb.AddForce(moveForce * forceDir);
+        rb.velocity = Vector2.ClampMagnitude(rb.velocity, maxSpeed);
     }
 
 

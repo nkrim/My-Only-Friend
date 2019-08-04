@@ -6,6 +6,7 @@ TagManager:
   tags:
   - ParasiteHead
   - LevelList
+  - Dog
   layers:
   - Default
   - TransparentFX
@@ -20,10 +21,10 @@ TagManager:
   - 
   - Dog
   - Parasite
-  - ParasiteBlockers
+  - ParasiteHead
   - 
-  - 
-  - 
+  - MeatDog
+  - MeatParasite
   - 
   - 
   - 

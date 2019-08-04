@@ -4,14 +4,10 @@ using UnityEngine;
 
 public class Parasite : MonoBehaviour
 {
-    public float injectionSpeed = 2f;
-    public float ejectionSpeed = 5f;
-    public float ejectionRamp = 0.7f;
+    public float baseX = 0.4f;
 
     // Private vars
     private bool flippedX = false;
-    private bool injecting = false;
-    private float ejection = -1f; // less than 0: all the way in, 1: all the way out
     private float injectionIncrement = 0.2f;
 
     // Linking vars
@@ -75,7 +71,7 @@ public class Parasite : MonoBehaviour
 
         Rigidbody2D base_link = tail_links[0];
         Transform t = base_link.transform;
-        t.localPosition = new Vector3(-t.localPosition.x, 0, 0);
+        t.localPosition = new Vector3(baseX * (this.flippedX ? 1 : -1), 0, 0);
         t.localScale = new Vector3(-t.localScale.x, 1, 1);
         t.localEulerAngles = new Vector3(0, 0, -t.localEulerAngles.z);
         //SliderJoint2D joint = t.GetComponent<SliderJoint2D>();
