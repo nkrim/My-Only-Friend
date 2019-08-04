@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Character : MonoBehaviour { 
-
+    
     public float jumpForce = 4000f;
+    public float maxJumpAngle = 20f;
     public float flipAfterTime = 1;
     public float walkSpeed = 10f;
     [Range(0f,1f)]
@@ -12,7 +13,8 @@ public class Character : MonoBehaviour {
     [Range(0f, 1f)]
     public float walkRampAir = 0.3f;
 
-    public bool removeControl = false;
+    public bool removeControl = true;
+    public bool removeControlOnInit = true;
 
     // Input vars
     bool jump_pressed = false;
@@ -25,6 +27,7 @@ public class Character : MonoBehaviour {
     // Linking vars
     private Parasite parasite;
     private Rigidbody2D rb;
+    private Transform dog;
     private Collider2D jump_cldr;
     private Collider2D top_cldr;
     private Collider2D front_cldr;
@@ -40,7 +43,8 @@ public class Character : MonoBehaviour {
         // Link vars
         if(!(parasite = GetComponentInChildren<Parasite>())) Debug.LogWarning("CHARACTER COULD NOT FIND PARASITE");
         if(!(rb = GetComponent<Rigidbody2D>())) Debug.LogWarning("CHARACTER COULD NOT FIND RIGIDBODY2D");
-        if(!(jump_cldr = transform.Find("JumpCollider").GetComponent<Collider2D>())) Debug.LogWarning("CHARACTER CAN'T FIND JUMP COLLIDER");
+        if(!(dog = transform.Find("Dog"))) Debug.LogWarning("CHARACTER COULD NOT FIND DOG");
+        if (!(jump_cldr = transform.Find("JumpCollider").GetComponent<Collider2D>())) Debug.LogWarning("CHARACTER CAN'T FIND JUMP COLLIDER");
         if (!(top_cldr = transform.Find("TopCollider").GetComponent<Collider2D>())) Debug.LogWarning("CHARACTER CAN'T FIND TOP COLLIDER");
         if (!(front_cldr = transform.Find("FrontCollider").GetComponent<Collider2D>())) Debug.LogWarning("CHARACTER CAN'T FIND FRONT COLLIDER");
         if (!(back_cldr = transform.Find("BackCollider").GetComponent<Collider2D>())) Debug.LogWarning("CHARACTER CAN'T FIND BACK COLLIDER");
@@ -48,6 +52,9 @@ public class Character : MonoBehaviour {
         p_head = GetComponentInChildren<ParasiteHead>();
         // Init layer masks
         foreground_mask = LayerMask.GetMask(new string[] { "Foreground" });
+        // other
+        if(removeControlOnInit)
+            removeControl = true;
     }
 
     // Update is called once per frame
@@ -69,8 +76,16 @@ public class Character : MonoBehaviour {
                     rb.bodyType = RigidbodyType2D.Dynamic;
                     transform.localEulerAngles = Vector3.zero;
                     rb.freezeRotation = true;
+                    // Reset dog
+                    dog.gameObject.layer = LayerMask.NameToLayer("Dog");
                     // Reset tail
                     parasite.ResetTail();
+                }
+            }
+            else if (removeControlOnInit) {
+                if (jump_cldr.IsTouchingLayers(foreground_mask) || top_cldr.IsTouchingLayers(foreground_mask) || front_cldr.IsTouchingLayers(foreground_mask) || back_cldr.IsTouchingLayers(foreground_mask)) {
+                    removeControl = false;
+                    //removeControlOnInit = false;
                 }
             }
             return;
@@ -116,8 +131,19 @@ public class Character : MonoBehaviour {
     }
 
 
+    public Transform GetDog() {
+        return dog;
+    }
+    public Parasite GetParasite() {
+        return parasite;
+    }
+
+
     bool IsGrounded() {
-        return jump_cldr.IsTouchingLayers(foreground_mask);
+        float angle = transform.localEulerAngles.z;
+        if(angle >= 180)
+            angle -= 360;
+        return Mathf.Abs(angle) <= maxJumpAngle && jump_cldr.IsTouchingLayers(foreground_mask);
     }
     bool IsGroundedForFlip() {
         if(rb.freezeRotation)
@@ -132,6 +158,7 @@ public class Character : MonoBehaviour {
         removeControl = true;
         flip_jumping = 1f;
         rb.bodyType = RigidbodyType2D.Kinematic;
+        dog.gameObject.layer = LayerMask.NameToLayer("DodgePhysics");
     }
 
     // Manipulate horizontal velocity by input_x
@@ -141,9 +168,11 @@ public class Character : MonoBehaviour {
         float final_vel_x = Mathf.Lerp(cur_vel_x, goal_vel_x, IsGrounded() ? walkRamp : walkRampAir);
         if(IsGroundedForFlip() && !IsGrounded())
             final_vel_x /= 10;
-        rb.velocity = new Vector3(final_vel_x, rb.velocity.y);
+        // Apply speed
+        if ((input_x > 0 && !front_cldr.IsTouchingLayers(foreground_mask)) || (input_x < 0 && !back_cldr.IsTouchingLayers(foreground_mask)))
+            rb.velocity = new Vector3(final_vel_x, rb.velocity.y);
         // Flip sprite
-        if(IsGrounded() && Mathf.Abs(input_x) > 0.01 && Mathf.Abs(final_vel_x) > 0.01 && dog_sprite.flipX == final_vel_x > 0) {
+        if (IsGrounded() && Mathf.Abs(input_x) > 0.01 && dog_sprite.flipX == final_vel_x > 0 /*&& Mathf.Abs(final_vel_x) > 0.01*/)  {
             dog_sprite.flipX = !dog_sprite.flipX;
             parasite.FlipX(dog_sprite.flipX);
         }

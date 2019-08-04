@@ -3,7 +3,9 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - ParasiteHead
+  - LevelList
   layers:
   - Default
   - TransparentFX
@@ -14,7 +16,7 @@ TagManager:
   - 
   - 
   - Foreground
-  - 
+  - LevelMarkers
   - 
   - Dog
   - Parasite
@@ -35,7 +37,7 @@ TagManager:
   - 
   - 
   - 
-  - 
+  - DodgePhysics
   - 
   m_SortingLayers:
   - name: Default

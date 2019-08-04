@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class MouseTracker : MonoBehaviour
 {
-
     // Update is called once per frame
     void Update()
     {
