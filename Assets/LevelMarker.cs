@@ -9,10 +9,25 @@ public class LevelMarker : MonoBehaviour
     public Vector3 respawnPoint = Vector3.zero;
     public bool initUpsideDown = false;
 
+    private GameObject light_list = null;
+    private CinemachineVirtualCamera vc = null;
+
+    private void Awake () {
+        light_list = transform.Find("Lights").gameObject;
+        light_list.SetActive(false);
+        vc = GetComponent<CinemachineVirtualCamera>();
+    }
+
+    private void Start () {
+
+    }
+
     private void OnTriggerEnter2D (Collider2D collision) {
         LevelChanger lc = Camera.main.GetComponent<LevelChanger>();
-        this.GetComponent<CinemachineVirtualCamera>().Priority = 100;
-        lc.cur_level.GetComponent<CinemachineVirtualCamera>().Priority = 10;
+        if(lc.cur_level == this)
+            return;
+        this.ActivateLevel();
+        lc.cur_level.DeactivateLevel();
         lc.prev_level = lc.cur_level;
         lc.cur_level = this;
     }
@@ -20,8 +35,8 @@ public class LevelMarker : MonoBehaviour
         LevelChanger lc = Camera.main.GetComponent<LevelChanger>();
         if(lc.cur_level == this) {
             Collider2D dog_cldr = GameObject.FindWithTag("Player").GetComponent<Character>().GetDog().GetComponent<Collider2D>();
-            lc.prev_level.GetComponent<CinemachineVirtualCamera>().Priority = 100;
-            lc.cur_level.GetComponent<CinemachineVirtualCamera>().Priority = 10;
+            lc.prev_level.ActivateLevel();
+            lc.cur_level.DeactivateLevel();
             lc.cur_level = lc.prev_level;
             lc.prev_level = this;
         }
@@ -29,6 +44,16 @@ public class LevelMarker : MonoBehaviour
 
     private void OnDrawGizmos () {
         Gizmos.DrawWireCube(transform.TransformPoint(respawnPoint), 0.25f*Vector3.one);
+    }
+
+    public void ActivateLevel() {
+        light_list.SetActive(true);
+        vc.Priority = 100;
+    }
+
+    public void DeactivateLevel() {
+        vc.Priority = 10;
+        light_list.SetActive(false);
     }
 
     public void Restart() {

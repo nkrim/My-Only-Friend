@@ -24,8 +24,13 @@ public class LevelChanger : MonoBehaviour
 
     private void Start () {
         prev_first_level_index = firstLevelIndex;
-        cur_level.GetComponent<CinemachineVirtualCamera>().Priority = 100;
-        cur_level.Restart();
+        // Deactivate lights on other levels
+        for (int i = 0; i < level_list.childCount; i++) {
+            if (i != firstLevelIndex) {
+                level_list.GetChild(i).GetComponent<LevelMarker>().DeactivateLevel();
+            }
+        }
+        cur_level.ActivateLevel();
     }
 
     public void Update () {
@@ -34,8 +39,8 @@ public class LevelChanger : MonoBehaviour
             prev_first_level_index = firstLevelIndex;
             prev_level = cur_level;
             cur_level = level_list.GetChild(firstLevelIndex).GetComponent<LevelMarker>();
-            cur_level.GetComponent<CinemachineVirtualCamera>().Priority = 100;
-            prev_level.GetComponent<CinemachineVirtualCamera>().Priority = 10;
+            cur_level.ActivateLevel();
+            prev_level.DeactivateLevel();
             cur_level.Restart();
         }
 

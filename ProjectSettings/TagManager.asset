@@ -40,6 +40,15 @@ TagManager:
   - DodgePhysics
   - 
   m_SortingLayers:
+  - name: Background
+    uniqueID: 185707623
+    locked: 0
+  - name: Foreground
+    uniqueID: 442089169
+    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Objects
+    uniqueID: 842283377
     locked: 0
