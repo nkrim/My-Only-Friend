@@ -386,11 +386,11 @@ public class DialogueSystem : MonoBehaviour {
             text = "*PLOP*"
         });
         d.dialogue.Add(new Sentence {
-            spriteIndex = -1,
+            spriteIndex = 2,
             text = "HEY!"
         });
         d.dialogue.Add(new Sentence {
-            spriteIndex = -1,
+            spriteIndex = 2,
             text = "HEY FRIEND!"
         });
         d.dialogue.Add(new Sentence {
@@ -402,15 +402,15 @@ public class DialogueSystem : MonoBehaviour {
             text = "ZZZ..."
         });
         d.dialogue.Add(new Sentence {
-            spriteIndex = -1,
+            spriteIndex = 2,
             text = "WHAT'S THIS?\nANOTHER FRIEND?"
         });
         d.dialogue.Add(new Sentence {
-            spriteIndex = -1,
+            spriteIndex = 2,
             text = "NO!"
         });
         d.dialogue.Add(new Sentence {
-            spriteIndex = -1,
+            spriteIndex = 2,
             text = "ONLY ONE FRIEND!"
         });
         d.dialogue.Add(new Sentence {
@@ -422,8 +422,40 @@ public class DialogueSystem : MonoBehaviour {
             text = "AGHHHHHHHHHHH!!!!!"
         });
         d.dialogue.Add(new Sentence {
-            spriteIndex = -1,
+            spriteIndex = 2,
             text = "I’M YOU’RE\nONLY FRIEND NOW..."
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = -1,
+            text = "THE END..."
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = -1,
+            text = "CREDITS:"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = -1,
+            text = "PROGRAMMING:\nNOAH KRIM"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = -1,
+            text = "DESIGN:\nNOAH KRIM"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = -1,
+            text = "ART:\nMATT ZEHNER"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = -1,
+            text = "MUSIC:\nSOMETHING SOFT"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = -1,
+            text = "CONCEPT:\nNOAH & MATT"
+        });
+        d.dialogue.Add(new Sentence {
+            spriteIndex = -1,
+            text = "THANKS FOR PLAYING!!!\n:)"
         });
         dialogueScenes.Add(d);
     }

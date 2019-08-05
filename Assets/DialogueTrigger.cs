@@ -11,7 +11,7 @@ public class DialogueTrigger : MonoBehaviour
     private void OnTriggerEnter2D (Collider2D collision) {
         if(!activated) {
             activated = true;
-            print(Camera.main.GetComponent<DialogueSystem>().StartScene(sceneName));
+            Camera.main.GetComponent<DialogueSystem>().StartScene(sceneName);
         }
     }
 }
